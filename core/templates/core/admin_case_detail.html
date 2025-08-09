@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del Caso - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Detalle del Caso: <strong>{{ case.case_number }}</strong></h3>
+            <a href="{% url 'core:admin_panel' %}" class="btn btn-outline-secondary">Volver al panel</a>
+        </div>
+
+        <!-- Termómetro de progreso -->
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <h5>Seguimiento del caso</h5>
+                <p><strong>Estado:</strong> <span class="badge bg-info">{{ case.get_status_display }}</span></p>
+                <p><strong>Plazo:</strong> <span class="badge bg-{{ deadline_class }}">{{ deadline_status }}</span> ({{ days_elapsed }} de {{ max_days }} días)</p>
+                <div class="progress" style="height: 25px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;">
+                        {{ progress }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Datos del caso -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Solicitante</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Nombre:</strong> {{ case.applicant_name }}</p>
+                        <p><strong>Cédula:</strong> {{ case.applicant_id }}</p>
+                        <p><strong>Teléfono:</strong> {{ case.applicant_phone|default:"No registrado" }}</p>
+                        <p><strong>Email:</strong> {{ case.applicant_email|default:"No registrado" }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">Involucrado</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Nombre:</strong> {{ case.involved_name }}</p>
+                        <p><strong>Cédula:</strong> {{ case.involved_id|default:"No especificada" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <h5>Detalles del Conflicto</h5>
+                <p><strong>Descripción:</strong> {{ case.conflict_description }}</p>
+                <p><strong>Lugar:</strong> {{ case.location }}</p>
+                <p><strong>Tipo:</strong> 
+    {% if case.conflict_type %}
+        {{ case.get_conflict_type_display }}
+        {% if case.other_conflict_type %}
+            ({{ case.other_conflict_type }})
+        {% endif %}
+    {% else %}
+        No especificado
+    {% endif %}
+</p>        
+                 
+                <p><strong>Valor estimado:</strong> {{ case.estimated_value|default:"No aplica" }}</p>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <h5>Resolución Solicitada</h5>
+                <p><strong>Método(s):</strong> 
+                    {% if case.resolution_method %}
+                        {{ case.resolution_method }}
+                        {% if case.other_resolution_method %} ({{ case.other_resolution_method }}){% endif %}
+                    {% else %}
+                        No especificado
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <h5>Observaciones</h5>
+                <p>{{ case.notes|default:"No hay observaciones." }}</p>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'core:admin_panel' %}" class="btn btn-outline-primary">Volver al panel</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

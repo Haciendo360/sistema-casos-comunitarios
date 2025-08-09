@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Juez de Paz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.1); }
+        .btn-primary { background: #0057B7; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Panel del Juez de Paz</h3>
+            <a href="{% url 'core:register_case' %}" class="btn btn-success">Registrar nuevo caso</a>
+        </div>
+<!-- Búsqueda -->
+<form method="get" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Buscar por número de caso o cédula del solicitante..." value="{{ request.GET.q }}">
+        <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+    </div>
+</form>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% if cases %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>N° de Caso</th>
+                            <th>Solicitante</th>
+                            <th>Involucrado</th>
+                            <th>Fecha de Registro</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for case in cases %}
+                            <tr>
+                                <td><strong>{{ case.case_number }}</strong></td>
+                                <td>{{ case.applicant_name }}</td>
+                                <td>{{ case.involved_name|default:"No especificado" }}</td>
+                                <td>{{ case.date_registered|date:"d/m/Y" }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ case.get_status_display|default:"Registrado" }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'core:case_detail' case.id %}" class="btn btn-sm btn-outline-primary">Ver</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <h4>No tienes casos registrados aún</h4>
+                <p class="text-muted">Usa el botón de arriba para registrar tu primer caso.</p>
+            </div>
+        {% endif %}
+
+        <hr class="my-4">
+        <!-- Botones de navegación -->
+<div class="text-center mt-3">
+    <a href="{% url 'core:home' %}" class="btn btn-outline-secondary me-2">
+        <i class="fas fa-arrow-left"></i> Volver al inicio
+    </a>
+    <a href="{% url 'core:logout' %}" class="btn btn-outline-danger">
+        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+    </a>
+</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

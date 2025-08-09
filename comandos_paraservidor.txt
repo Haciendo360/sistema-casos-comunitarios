@@ -1,0 +1,15 @@
+
+habilitar entorno virtual 
+venv\Scripts\activate 
+actualizar cambios local base datos 
+
+python manage.py makemigrations
+python manage.py migrate
+arrancar server local django 
+
+python manage.py runserver
+
+
+crear ususarios 
+
+python manage.py createsuperuser
