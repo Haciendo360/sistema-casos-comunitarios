@@ -13,3 +13,44 @@ python manage.py runserver
 crear ususarios 
 
 python manage.py createsuperuser
+
+
+como desplegar 
+
+"Muéstrame cómo desplegarlo en línea con GitHub y Render" 
+
+
+🔐 Añadir actualización de estado del caso por parte del juez
+⏳ Implementar prórroga de 15 días (una sola vez)
+🔍 Búsqueda de casos por número o cédula en el panel del juez
+📊 Panel del Administrador: gestión de usuarios y casos
+📄 Generar reportes en PDF (caso individual y listado)
+☁️ Preparar para despliegue en línea con GitHub + Render.com (gratis)
+
+
+✅ Añadir el campo de búsqueda en admin_panel.html
+✅ Mostrar el valor buscado en el input al recargar
+✅ Añadir gráficos con Chart.js
+✅ Desplegar en línea con GitHub + Render.com
+
+
+
+✅ Requisitos básicos:
+Backend en Python (lógica, base de datos, autenticación).
+Frontend web (para que los usuarios interactúen desde el navegador).
+Base de datos (para guardar los cambios de cada usuario).
+Servidor en la nube (para que esté en línea 24/7).
+Autenticación de usuarios (para que cada uno tenga su cuenta y permisos).
+
+
+
+
+
+
+el código corrígemelo y aplícale los cambios pero recuerda no menejo mucho la programación debes explicarme y no afectar el resto de la aplicación 
+
+
+
+prompt pendiente 
+
+ok funciona pero en detalle de conflicto aparece no especificado, pero tenemos unos detalles desde el panel administrativo al editar un caso y modificar el tipo de conflicto no se actualiza y no aparece en case_detael o detalle del caso actualizado. tambien cuando creas el caso como juez aparece el tipo de conflicto lo selecciona pero el mismo no se guarda y todo esto afecta el chart.js la torta grafica de tipo de conflicto por que no la contabiliza y distribuye 

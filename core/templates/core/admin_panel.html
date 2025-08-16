@@ -1,312 +1,117 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel del Administrador</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: {{ settings.primary_color|default:"#0057B7" }};
-            --secondary-color: {{ settings.secondary_color|default:"#FFD700" }};
-        }
-        .header, .btn-primary, .card.bg-primary {
-            background: var(--primary-color) !important;
-            border-color: var(--primary-color);
-        }
-        .btn-warning {
-            background: var(--secondary-color) !important;
-            border-color: var(--secondary-color);
-            color: #000 !important;
-        }
-        .btn-outline-primary {
-            color: var(--primary-color) !important;
-            border-color: var(--primary-color);
-        }
-        .btn-outline-primary:hover {
-            background: var(--primary-color) !important;
-            color: white !important;
-        }
-        .logo-img {
-            max-height: 60px;
-            margin-right: 15px;
-        }
-    </style>
-</head>
-<body class="bg-light">
-    <div class="container py-5">
-        <div class="header d-flex align-items-center mb-4 p-3 rounded">
-            {% if settings.logo %}
-                <img src="{{ settings.logo.url }}" class="logo-img" alt="Logo">
-            {% endif %}
-            <h2 class="text-white mb-0"><i class="fas fa-shield-alt"></i> Panel del Administrador</h2>
-            <p class="text-white">Bienvenido, {{ request.user.username }}. Gestiona usuarios y casos.</p>
-        </div>
+{% extends 'core/base.html' %}
+{% block title %}Panel de Administración{% endblock %}
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+{% block content %}
+    <h2 class="mb-4">Panel del Administrador</h2>
 
-       <!-- Botón de Personalización de Plataforma -->
-<div class="mb-4 text-end">
-    <a href="{% url 'core:platform_settings' %}" class="btn btn-warning btn-sm">
-        <i class="fas fa-cog"></i> Personalizar Plataforma
-    </a>
-</div>
-
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white text-center">
-                    <div class="card-body">
-                        <h5>Total de Casos</h5>
-                        <h2>{{ total_cases }}</h2>
-                    </div>
-                </div>
-            </div>
-            {% for label, count in cases_by_status.items %}
-            <div class="col-md-2">
-                <div class="card text-center" style="background: var(--primary-color); color: white;">
-                    <div class="card-body">
-                        <small>{{ label }}</small>
-                        <h5>{{ count }}</h5>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <form method="get" class="mb-3">
-            <div class="input-group">
-                <input type="text" name="q" class="form-control" placeholder="Buscar por número de caso o cédula..." value="{{ request.GET.q }}">
-                <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-            </div>
-        </form>
-
-        <div class="card shadow mb-4">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros de Búsqueda</h5>
-            </div>
-            <div class="card-body filter-section">
-                <form method="get" class="row g-3">
-                    <div class="col-md-3">
-                        <label><i class="fas fa-flag"></i> Estado del Caso</label>
-                        <select name="status" class="form-select">
-                            <option value="">Todos</option>
-                            {% for value, label in CASE_STATUS %}
-                                <option value="{{ value }}" {% if filter_status == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label><i class="fas fa-user-tie"></i> Juez (usuario)</label>
-                        <input type="text" name="judge" class="form-control" value="{{ filter_judge|default:'' }}" placeholder="Nombre de usuario">
-                    </div>
-                    <div class="col-md-3">
-                        <label><i class="fas fa-calendar"></i> Desde</label>
-                        <input type="date" name="date_from" class="form-control" value="{{ filter_date_from|default:'' }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label><i class="fas fa-calendar-check"></i> Hasta</label>
-                        <input type="date" name="date_to" class="form-control" value="{{ filter_date_to|default:'' }}">
-                    </div>
-                    <div class="col-12 text-end">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Filtrar
-                        </button>
-                        <a href="{% url 'core:admin_panel' %}" class="btn btn-outline-secondary">
-                            <i class="fas fa-times"></i> Limpiar
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        {% if pending_users %}
+    <!-- Usuarios pendientes -->
+    {% if pending_users %}
         <div class="card shadow mb-4">
             <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0"><i class="fas fa-user-clock"></i> Usuarios Pendientes de Aprobación</h5>
+                <h5 class="mb-0">Usuarios Pendientes de Aprobación</h5>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-dark">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cédula</th>
+                            <th>Rol solicitado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_profile in pending_users %}
                             <tr>
-                                <th>Nombre Completo</th>
-                                <th>Cédula</th>
-                                <th>Rol Solicitado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for up in pending_users %}
-                            <tr>
-                                <td>{{ up.full_name }} {{ up.last_name }}</td>
-                                <td>{{ up.id_number }}</td>
+                                <td>{{ user_profile.full_name }} {{ user_profile.last_name }}</td>
+                                <td>{{ user_profile.id_number }}</td>
+                                <td>{{ user_profile.get_role_request_display }}</td>
                                 <td>
-                                    <span class="badge bg-info">{{ up.get_role_request_display }}</span>
-                                </td>
-                                <td>
-                                    <a href="{% url 'core:approve_user' up.id %}" class="btn btn-sm btn-approve">
-                                        <i class="fas fa-check"></i> Aprobar
-                                    </a>
-                                    <a href="{% url 'core:reject_user' up.id %}" class="btn btn-sm btn-reject">
-                                        <i class="fas fa-times"></i> Rechazar
-                                    </a>
+                                    <a href="{% url 'core:approve_user' user_profile.id %}" class="btn btn-sm btn-success">Aprobar</a>
+                                    <a href="{% url 'core:reject_user' user_profile.id %}" class="btn btn-sm btn-danger">Rechazar</a>
                                 </td>
                             </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-        {% endif %}
+    {% endif %}
 
-        <div class="card shadow">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0"><i class="fas fa-file-alt"></i> Todos los Casos Registrados</h5>
-            </div>
-            <div class="card-body">
-                {% if cases %}
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>N° de Caso</th>
-                                <th>Solicitante</th>
-                                <th>Juez Asignado</th>
-                                <th>Estado</th>
-                                <th>Fecha de Registro</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for case in cases %}
-                            <tr>
-                                <td><strong>{{ case.case_number }}</strong></td>
-                                <td>{{ case.applicant_name }}</td>
-                                <td>{{ case.judge.username }}</td>
-                                <td>
-                                    <span class="badge badge-status bg-info">{{ case.get_status_display }}</span>
-                                </td>
-                                <td>{{ case.date_registered|date:"d/m/Y H:i" }}</td>
-                                <td>
-   <a href="{% url 'core:admin_case_detail' case.id %}" class="btn btn-sm btn-outline-primary me-1">
-    <i class="fas fa-eye"></i> Ver
-</a>
-<a href="{% url 'core:edit_case' case.id %}" class="btn btn-sm btn-outline-warning me-1">
-    <i class="fas fa-edit"></i> Editar
-</a>
-<a href="{% url 'core:delete_case' case.id %}" class="btn btn-sm btn-outline-danger">
-    <i class="fas fa-trash"></i> Eliminar
-</a>
-</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="text-center py-5">
-                    <h5>No se encontraron casos con los filtros aplicados.</h5>
-                    <a href="{% url 'core:admin_panel' %}" class="btn btn-outline-secondary mt-2">Limpiar filtros</a>
-                </div>
-                {% endif %}
-            </div>
+    <!-- Filtros -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Filtros de Búsqueda</h5>
         </div>
-
-        <div class="row mb-4 mt-5">
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Casos por Estado</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="statusChart"></canvas>
-                    </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label>Estado</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos</option>
+                        {% for value, label in CASE_STATUS %}
+                            <option value="{{ value }}" {% if filter_status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">Tipos de Conflicto</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="conflictChart"></canvas>
-                    </div>
+                <div class="col-md-3">
+                    <label>Juez</label>
+                    <input type="text" name="judge" class="form-control" value="{{ filter_judge|default:'' }}" placeholder="Nombre de usuario">
                 </div>
-            </div>
+                <div class="col-md-3">
+                    <label>Desde</label>
+                    <input type="date" name="date_from" class="form-control" value="{{ filter_date_from|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <label>Hasta</label>
+                    <input type="date" name="date_to" class="form-control" value="{{ filter_date_to|default:'' }}">
+                </div>
+                <div class="col-md-6">
+                    <label>Búsqueda rápida</label>
+                    <input type="text" name="q" class="form-control" value="{{ query|default:'' }}" placeholder="Número de caso, cédula...">
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="{% url 'core:admin_panel' %}" class="btn btn-outline-secondary ms-2">Limpiar</a>
+                </div>
+            </form>
         </div>
-
-        <div class="text-center mt-4">
-            <a href="{% url 'core:download_cases_csv' %}" class="btn btn-outline-info">
-                <i class="fas fa-file-csv"></i> Descargar reporte en CSV
-            </a>
-        </div>
-
-        <!-- Botones de navegación -->
-<div class="text-center mt-3">
-    <a href="{% url 'core:home' %}" class="btn btn-outline-secondary me-2">
-        <i class="fas fa-arrow-left"></i> Volver al inicio
-    </a>
-    <a href="{% url 'core:logout' %}" class="btn btn-outline-danger">
-        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-    </a>
-</div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        const statusData = JSON.parse('{{ status_data|safe }}');
-        new Chart(statusCtx, {
-            type: 'bar',
-            data: {
-                labels: statusData.map(d => d.label),
-                datasets: [{
-                    label: 'Número de Casos',
-                    data: statusData.map(d => d.value),
-                    backgroundColor: 'var(--primary-color)',
-                    borderColor: 'rgba(0, 87, 183, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-
-        const conflictCtx = document.getElementById('conflictChart').getContext('2d');
-        const conflictLabels = JSON.parse('{{ conflict_labels|safe }}');
-        const conflictValues = JSON.parse('{{ conflict_values|safe }}');
-        new Chart(conflictCtx, {
-            type: 'doughnut',
-            data: {
-                labels: conflictLabels,
-                datasets: [{
-                    data: conflictValues,
-                    backgroundColor: [
-                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'top' }
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+    <!-- Lista de casos -->
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Casos Registrados ({{ total_cases }})</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Solicitante</th>
+                        <th>Estado</th>
+                        <th>Juez</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in cases %}
+                        <tr>
+                            <td>{{ case.case_number }}</td>
+                            <td>{{ case.applicant_name }}</td>
+                            <td><span class="badge bg-info">{{ case.get_status_display }}</span></td>
+                            <td>{{ case.judge.username }}</td>
+                            <td>{{ case.date_registered|date:"d/m/Y" }}</td>
+                            <td>
+                                <a href="{% url 'core:admin_case_detail' case.id %}" class="btn btn-sm btn-outline-primary me-1">Ver</a>
+                                <a href="{% url 'core:edit_case' case.id %}" class="btn btn-sm btn-outline-warning me-1">Editar</a>
+                                <a href="{% url 'core:delete_case' case.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

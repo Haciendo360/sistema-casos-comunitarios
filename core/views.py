@@ -213,6 +213,8 @@ def register_case(request):
             messages.error(request, "Por favor corrige los errores del formulario.")
     else:
         form = CaseForm()
+        
+    settings = PlatformSettings.load()
 
     return render(request, 'core/register_case.html', {'form': form, 'settings': settings})
 
