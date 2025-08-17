@@ -144,15 +144,45 @@
 
     <!-- Scripts de gráficos -->
 <script>
+    // Gráfico de casos por estado (barras)
     const statusCtx = document.getElementById('statusChart').getContext('2d');
     const statusChart = new Chart(statusCtx, {
         type: 'bar',
         data: {
             labels: {{ status_labels|safe }},
             datasets: [{
+                label: 'Cantidad',  // ✅ Etiqueta del dataset
                  {{ status_values|safe }},
-                backgroundColor: '#0057B7'
+                backgroundColor: '#0057B7',
+                borderColor: '#003a8c',
+                borderWidth: 1
             }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Gráfico de tipos de conflicto (pastel)
+    const conflictCtx = document.getElementById('conflictChart').getContext('2d');
+    const conflictChart = new Chart(conflictCtx, {
+        type: 'pie',
+         {
+            labels: {{ conflict_labels|safe }},
+            datasets: [{
+                 {{ conflict_values|safe }},
+                backgroundColor: [
+                    '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
+                ]
+            }]
+        },
+        options: {
+            responsive: true
         }
     });
 </script>
