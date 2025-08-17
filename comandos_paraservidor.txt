@@ -54,3 +54,65 @@ el código corrígemelo y aplícale los cambios pero recuerda no menejo mucho la
 prompt pendiente 
 
 ok funciona pero en detalle de conflicto aparece no especificado, pero tenemos unos detalles desde el panel administrativo al editar un caso y modificar el tipo de conflicto no se actualiza y no aparece en case_detael o detalle del caso actualizado. tambien cuando creas el caso como juez aparece el tipo de conflicto lo selecciona pero el mismo no se guarda y todo esto afecta el chart.js la torta grafica de tipo de conflicto por que no la contabiliza y distribuye 
+
+
+
+
+✅ ¿Qué sigue?
+Puedes elegir:
+
+🔐 Recuperación de contraseña
+Enviar enlace por correo para restablecer contraseña
+Seguro y automático
+📄 Generar PDF de casos
+Descargar el detalle del caso como documento oficial
+Ideal para imprimir o archivar
+📧 Configuración de correo con Gmail
+Para que el sistema pueda enviar emails (recuperación, notificaciones)
+📱 Mejorar diseño de formularios específicos
+Como register_case.html, admin_panel.html, etc.
+
+
+
+CONFIGURACION DE DESARROLLO A PRODUCCION 
+
+
+IMPORTANTE PARA PASAR Y ACTUALIZAR ARCHIVOS POR CONSOLA PARA GITHUB Y RENDER 
+
+aso 2: Sube los cambios a GitHub
+Abre tu terminal en la carpeta del proyecto y ejecuta estos comandos:
+
+bash
+
+
+1
+git add .
+✅ Añade todos los archivos nuevos o modificados (incluyendo los .html) 
+
+bash
+
+
+1
+git commit -m "Mejora de diseño: base.html y plantillas responsivas"
+✅ Guarda los cambios localmente con un mensaje claro 
+
+bash
+
+
+1
+git push origin main
+✅ Sube los cambios a GitHub 
+
+🔹 Si usaste master en lugar de main, usa: 
+
+bash
+
+
+1
+git push origin master
+📁 Paso 3: Render los despliega automáticamente
+Ve a https://dashboard.render.com
+Haz clic en tu servicio: sistema-casos-comunitarios
+Verás un nuevo "Deploy" en la lista de eventos
+Espera 3-5 minutos
+Cuando termine (✅ verde), tu sitio tendrá el nuevo diseño
