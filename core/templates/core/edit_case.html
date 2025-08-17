@@ -1,135 +1,202 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Editar Caso - {{ case.case_number }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: {{ settings.primary_color|default:"#0057B7" }};
-        }
-        .btn-primary {
-            background: var(--primary-color) !important;
-            border-color: var(--primary-color);
-        }
-        .header {
-            background: var(--primary-color);
-            color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-    </style>
-</head>
-<body class="bg-light">
-    <div class="container py-5">
-        <!-- Encabezado -->
-        <div class="header text-center mb-4">
-            <h2><i class="fas fa-edit"></i> Editar Caso: {{ case.case_number }}</h2>
-            <p>Modifica los datos del caso</p>
-        </div>
+{% extends 'core/base.html' %}
+{% block title %}Editar Caso: {{ case.case_number }}{% endblock %}
 
-        <!-- Mensajes -->
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-warning text-dark py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-edit fa-2x me-3"></i>
+                        <h2 class="mb-0">Editar Caso: {{ case.case_number }}</h2>
+                    </div>
                 </div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Formulario -->
-        <form method="post">
-            {% csrf_token %}
-
-            <!-- Errores del formulario -->
-{% if form.errors %}
-    <div class="alert alert-danger">
-        <strong>Hay errores en el formulario:</strong>
-        <ul>
-            {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                    <li>{{ field }}: {{ error }}</li>
-                {% endfor %}
-            {% endfor %}
-        </ul>
-    </div>
-{% endif %}
-
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Solicitante</h5>
-                    {{ form.applicant_name }}
-                    {{ form.applicant_id }}
-                    {{ form.applicant_phone }}
-                    {{ form.applicant_email }}
-                </div>
-                <div class="col-md-6">
-                    <h5>Involucrado</h5>
-                    {{ form.involved_name }}
-                    {{ form.involved_id }}
+                <div class="card-body p-4">
+                    <!-- Errores del formulario -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Corrige los siguientes errores:</strong>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li><strong>{{ field|capfirst }}</strong>: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Información del caso -->
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <i class="fas fa-info-circle fa-2x me-3 mt-1"></i>
+                            <div>
+                                <h5 class="mb-1">Información del Caso</h5>
+                                <p class="mb-0">Solicitante: <strong>{{ case.applicant_name }}</strong> ({{ case.applicant_id }})</p>
+                                <p class="mb-0">Involucrado: <strong>{{ case.involved_name }}</strong> ({{ case.involved_id|default:"No especificada" }})</p>
+                                <p class="mb-0">Fecha de registro: <strong>{{ case.date_registered|date:"d/m/Y H:i" }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Formulario -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Solicitante e Involucrado -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-primary h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h4 class="mb-0"><i class="fas fa-user me-2"></i>Solicitante</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            {{ form.applicant_name.label_tag }}
+                                            {{ form.applicant_name }}
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.applicant_id.label_tag }}
+                                            {{ form.applicant_id }}
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.applicant_phone.label_tag }}
+                                            {{ form.applicant_phone }}
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.applicant_email.label_tag }}
+                                            {{ form.applicant_email }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card border-warning h-100">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h4 class="mb-0"><i class="fas fa-user-tag me-2"></i>Involucrado</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            {{ form.involved_name.label_tag }}
+                                            {{ form.involved_name }}
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.involved_id.label_tag }}
+                                            {{ form.involved_id }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Detalles del Conflicto -->
+                        <div class="card border-info mb-4">
+                            <div class="card-header bg-info text-white">
+                                <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Detalles del Conflicto</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form.conflict_description.label_tag }}
+                                    {{ form.conflict_description }}
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.location.label_tag }}
+                                    {{ form.location }}
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.conflict_type.label_tag }}
+                                    {{ form.conflict_type }}
+                                </div>
+                                {% if form.other_conflict_type %}
+                                    <div class="mb-3">
+                                        {{ form.other_conflict_type.label_tag }}
+                                        {{ form.other_conflict_type }}
+                                    </div>
+                                {% endif %}
+                                <div class="mb-3">
+                                    {{ form.estimated_value.label_tag }}
+                                    {{ form.estimated_value }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Resolución Solicitada -->
+                        <div class="card border-success mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h4 class="mb-0"><i class="fas fa-handshake me-2"></i>Resolución Solicitada</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form.resolution_method.label_tag }}
+                                    {{ form.resolution_method }}
+                                </div>
+                                {% if form.other_resolution_method %}
+                                    <div class="mb-3">
+                                        {{ form.other_resolution_method.label_tag }}
+                                        {{ form.other_resolution_method }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Observaciones -->
+                        <div class="card border-secondary mb-4">
+                            <div class="card-header bg-secondary text-white">
+                                <h4 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Observaciones Adicionales</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form.notes.label_tag }}
+                                    {{ form.notes }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Estado del caso (solo para admin) -->
+                        {% if user.profile.role == 'admin' %}
+                        <div class="card border-dark mb-4">
+                            <div class="card-header bg-dark text-white">
+                                <h4 class="mb-0"><i class="fas fa-cog me-2"></i>Configuración del Caso</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="id_status" class="form-label">Estado del Caso</label>
+                                    <select name="status" id="id_status" class="form-select">
+                                        {% for value, label in case.CASE_STATUS %}
+                                            <option value="{{ value }}" {% if case.status == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="id_extension_granted" name="extension_granted" {% if case.extension_granted %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_extension_granted">
+                                        Prórroga concedida (30 días en total)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Consentimientos (ocultos en edición) -->
+                        {{ form.consentimiento_1.as_hidden }}
+                        {{ form.consentimiento_2.as_hidden }}
+                        
+                        <!-- Botones de acción -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                            <button type="submit" class="btn btn-warning btn-lg px-5 py-2">
+                                <i class="fas fa-save me-2"></i>Guardar Cambios
+                            </button>
+                            <a href="{% url 'core:admin_case_detail' case.id %}" class="btn btn-outline-secondary btn-lg px-4">
+                                <i class="fas fa-times me-1"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-            <h5>Detalles del Conflicto</h5>
-            {{ form.conflict_description }}
-            <div class="mb-3">
-    {{ form.conflict_type.label_tag }}
-    {{ form.conflict_type }}
-</div>
-<div class="mb-3">
-    {{ form.location.label_tag }}
-    {{ form.location }}
-</div>
-            {% if form.other_conflict_type %}
-                <div class="mb-3">{{ form.other_conflict_type }}</div>
-            {% endif %}
-
-            <h5>Resolución</h5>
-            {{ form.resolution_method }}
-            {% if form.other_resolution_method %}
-                <div class="mb-3">{{ form.other_resolution_method }}</div>
-            {% endif %}
-
-            <h5>Observaciones</h5>
-            {{ form.notes }}
-
-<!-- Errores del formulario -->
-{% if form.errors %}
-    <div class="alert alert-danger">
-        <strong>Corrige los siguientes errores:</strong>
-        <ul>
-            {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                    <li><strong>{{ field|capfirst }}</strong>: {{ error }}</li>
-                {% endfor %}
-            {% endfor %}
-        </ul>
+        </div>
     </div>
-{% endif %}
-
-<!-- Formulario -->
-<form method="post">
-    {% csrf_token %}
-
-    <!-- ... resto del formulario ... -->
-
-    <!-- Botones centrados -->
-    <div class="mt-4 text-center">
-        <button type="submit" class="btn btn-primary btn-lg me-3">
-            <i class="fas fa-save"></i> Guardar Cambios
-        </button>
-        <a href="{% url 'core:admin_case_detail' case.id %}" class="btn btn-outline-secondary btn-lg">
-            <i class="fas fa-times"></i> Cancelar
-        </a>
-    </div>
-      
-</div>
-        </form>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}
