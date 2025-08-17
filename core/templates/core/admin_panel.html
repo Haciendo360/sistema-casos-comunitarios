@@ -115,44 +115,44 @@
         </div>
     </div>
 
-    <!-- Gráficos -->
-    <div class="row mt-4">
-        <!-- Gráfico de casos por estado -->
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Casos por Estado</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="statusChart" width="400" height="200"></canvas>
-                </div>
+   <!-- Gráficos -->
+<div class="row mt-4">
+    <!-- Gráfico de casos por estado -->
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Casos por Estado</h5>
             </div>
-        </div>
-
-        <!-- Gráfico de tipos de conflicto -->
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Tipos de Conflicto</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="conflictChart" width="400" height="200"></canvas>
-                </div>
+            <div class="card-body">
+                <canvas id="statusChart" width="400" height="200"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Scripts de gráficos -->
+    <!-- Gráfico de tipos de conflicto -->
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Tipos de Conflicto</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="conflictChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts de gráficos -->
 <script>
-    // Gráfico de casos por estado (barras)
+    // Gráfico de barras: Casos por Estado
     const statusCtx = document.getElementById('statusChart').getContext('2d');
     const statusChart = new Chart(statusCtx, {
         type: 'bar',
         data: {
             labels: {{ status_labels|safe }},
             datasets: [{
-                label: 'Cantidad',  // ✅ Etiqueta del dataset
-                 {{ status_values|safe }},
+                label: 'Cantidad',
+                data: {{ status_values|safe }},
                 backgroundColor: '#0057B7',
                 borderColor: '#003a8c',
                 borderWidth: 1
@@ -168,17 +168,15 @@
         }
     });
 
-    // Gráfico de tipos de conflicto (pastel)
+    // Gráfico de pastel: Tipos de Conflicto
     const conflictCtx = document.getElementById('conflictChart').getContext('2d');
     const conflictChart = new Chart(conflictCtx, {
         type: 'pie',
-         {
+        data: {
             labels: {{ conflict_labels|safe }},
             datasets: [{
-                 {{ conflict_values|safe }},
-                backgroundColor: [
-                    '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
-                ]
+                data: {{ conflict_values|safe }},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
             }]
         },
         options: {
