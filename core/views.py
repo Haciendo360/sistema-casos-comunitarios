@@ -117,16 +117,20 @@ def admin_panel(request):
         count = cases.filter(status=status).count()
         cases_by_status[label] = count
 
+    # Datos para gráfico de casos por estado
     status_data = [
-        {'label': label, 'value': count}
-        for label, count in cases_by_status.items()
+    {'label': label, 'value': count}
+    for label, count in cases_by_status.items()
     ]
+
+    # Datos para gráfico de tipos de conflicto
     conflict_data = (
-        cases
-        .values('conflict_type')
-        .annotate(count=Count('conflict_type'))
-        .order_by('-count')
+    cases
+    .values('conflict_type')
+    .annotate(count=Count('conflict_type'))
+    .order_by('-count')
     )
+    
     conflict_labels = []
     conflict_values = []
     for item in conflict_data:
@@ -147,10 +151,10 @@ def admin_panel(request):
         'filter_date_to': date_to,
         'query': query,
         'settings': settings,
-        'status_data': json.dumps(status_data),
+        'status_data': json.dumps([item['value'] for item in status_data]),  # Solo valores
         'conflict_labels': json.dumps(conflict_labels),
         'conflict_values': json.dumps(conflict_values),
-    }
+}
     return render(request, 'core/admin_panel.html', context)
 
 

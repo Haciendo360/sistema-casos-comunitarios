@@ -79,7 +79,7 @@
     </div>
 
     <!-- Lista de casos -->
-    <div class="card shadow">
+    <div class="card shadow mb-4">
         <div class="card-header bg-success text-white">
             <h5 class="mb-0">Casos Registrados ({{ total_cases }})</h5>
         </div>
@@ -114,4 +114,76 @@
             </table>
         </div>
     </div>
+
+    <!-- Gráficos -->
+    <div class="row mt-4">
+        <!-- Gráfico de casos por estado -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Casos por Estado</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de tipos de conflicto -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Tipos de Conflicto</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="conflictChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de gráficos -->
+    <script>
+        // Gráfico de casos por estado
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        const statusChart = new Chart(statusCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ status_data|safe }},
+                datasets: [{
+                    label: 'Cantidad',
+                    data: {{ status_data|safe }},
+                    backgroundColor: '#007bff',
+                    borderColor: '#007bff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Gráfico de tipos de conflicto
+        const conflictCtx = document.getElementById('conflictChart').getContext('2d');
+        const conflictChart = new Chart(conflictCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ conflict_labels|safe }},
+                datasets: [{
+                    data: {{ conflict_values|safe }},
+                    backgroundColor: [
+                        '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
 {% endblock %}
