@@ -59,6 +59,21 @@
                         <h5>Observaciones</h5>
                         <div class="mb-3">{{ form.notes.label_tag }} {{ form.notes }}</div>
 
+                        <!-- Consentimientos -->
+                        <div class="mb-3 form-check">
+                        {{ form.consentimiento_1 }}
+                        <label class="form-check-label" for="{{ form.consentimiento_1.id_for_label }}">
+                            Confirmo que la información proporcionada es verdadera.
+                        </label>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                        {{ form.consentimiento_2 }}
+                        <label class="form-check-label" for="{{ form.consentimiento_2.id_for_label }}">
+                            Autorizo que mi caso sea gestionado conforme a la Ley y la normativa aplicable.
+                        </label>
+                        </div>
+
                         <div class="mt-4 text-center">
                             <button type="submit" class="btn btn-primary btn-lg me-3">
                                 <i class="fas fa-save"></i> Registrar Caso
