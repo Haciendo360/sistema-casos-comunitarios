@@ -118,19 +118,20 @@ def admin_panel(request):
         cases_by_status[label] = count
 
     # Datos para gráfico de casos por estado
-    status_data = [
-    {'label': label, 'value': count}
-    for label, count in cases_by_status.items()
-    ]
+    status_labels = []  # ✅ Etiquetas: "Registrado", "En trámite", etc.
+    status_values = []  # ✅ Valores: 5, 3, 2, etc.
+    for status, label in Case.CASE_STATUS:
+        count = cases.filter(status=status).count()
+        status_labels.append(label)
+        status_values.append(count)
 
     # Datos para gráfico de tipos de conflicto
     conflict_data = (
-    cases
-    .values('conflict_type')
-    .annotate(count=Count('conflict_type'))
-    .order_by('-count')
+        cases
+        .values('conflict_type')
+        .annotate(count=Count('conflict_type'))
+        .order_by('-count')
     )
-    
     conflict_labels = []
     conflict_values = []
     for item in conflict_data:
@@ -139,21 +140,23 @@ def admin_panel(request):
         conflict_values.append(item['count'])
 
     context = {
-        'pending_users': pending_users,
-        'cases': cases,
-        'total_cases': total_cases,
-        'cases_by_status': cases_by_status,
-        'CASE_STATUS': Case.CASE_STATUS,
-        'all_judges': User.objects.filter(profile__role='juez').distinct(),
-        'filter_status': status_filter,
-        'filter_judge': judge_filter,
-        'filter_date_from': date_from,
-        'filter_date_to': date_to,
-        'query': query,
-        'settings': settings,
-        'status_data': json.dumps([item['value'] for item in status_data]),  # Solo valores
-        'conflict_labels': json.dumps(conflict_labels),
-        'conflict_values': json.dumps(conflict_values),
+    'pending_users': pending_users,
+    'cases': cases,
+    'total_cases': total_cases,
+    'cases_by_status': cases_by_status,
+    'CASE_STATUS': Case.CASE_STATUS,
+    'all_judges': User.objects.filter(profile__role='juez').distinct(),
+    'filter_status': status_filter,
+    'filter_judge': judge_filter,
+    'filter_date_from': date_from,
+    'filter_date_to': date_to,
+    'query': query,
+    'settings': settings,
+    # ✅ DATOS CORREGIDOS PARA GRÁFICOS
+    'status_labels': json.dumps(status_labels),
+    'status_values': json.dumps(status_values),
+    'conflict_labels': json.dumps(conflict_labels),
+    'conflict_values': json.dumps(conflict_values),
 }
     return render(request, 'core/admin_panel.html', context)
 

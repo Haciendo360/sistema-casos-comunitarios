@@ -143,47 +143,17 @@
     </div>
 
     <!-- Scripts de gráficos -->
-    <script>
-        // Gráfico de casos por estado
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        const statusChart = new Chart(statusCtx, {
-            type: 'bar',
-            data: {
-                labels: {{ status_data|safe }},
-                datasets: [{
-                    label: 'Cantidad',
-                    data: {{ status_data|safe }},
-                    backgroundColor: '#007bff',
-                    borderColor: '#007bff',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Gráfico de tipos de conflicto
-        const conflictCtx = document.getElementById('conflictChart').getContext('2d');
-        const conflictChart = new Chart(conflictCtx, {
-            type: 'pie',
-            data: {
-                labels: {{ conflict_labels|safe }},
-                datasets: [{
-                    data: {{ conflict_values|safe }},
-                    backgroundColor: [
-                        '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true
-            }
-        });
-    </script>
+<script>
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(statusCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ status_labels|safe }},
+            datasets: [{
+                 {{ status_values|safe }},
+                backgroundColor: '#0057B7'
+            }]
+        }
+    });
+</script>
 {% endblock %}
