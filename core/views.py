@@ -17,11 +17,11 @@ from django.contrib.auth import logout
 def logout_view(request):
     """
     Vista: Cerrar sesión
-    Redirige al login después de cerrar sesión
+    Redirige a home después de cerrar sesión
     """
     logout(request)
     messages.info(request, "Has cerrado sesión correctamente.")
-    return redirect('core:login')
+    return redirect('core:home')
 
 def register(request):
     if request.method == 'POST':
