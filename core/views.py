@@ -117,7 +117,7 @@ def admin_panel(request):
         count = cases.filter(status=status).count()
         cases_by_status[label] = count
 
-    # Datos para gráfico de casos por estado (solo estados relevantes)
+    # Datos para gráfico de casos por estado
     status_labels = []  # ✅ Etiquetas: "En trámite", "Resuelto", "Cerrado"
     status_values = []  # ✅ Valores: 5, 3, 2, etc.
     
@@ -129,6 +129,7 @@ def admin_panel(request):
             status_labels.append(label)
             status_values.append(count)
 
+    # ✅ CORRECCIÓN: conflict_data (no conflict_)
     # Datos para gráfico de tipos de conflicto
     conflict_data = (
         cases
@@ -138,11 +139,13 @@ def admin_panel(request):
     )
     conflict_labels = []
     conflict_values = []
+    # ✅ CORRECCIÓN: for item in conflict_data (no conflict_)
     for item in conflict_data:
         label = dict(Case.CONFLICT_TYPE_CHOICES).get(item['conflict_type'], item['conflict_type'])
         conflict_labels.append(label)
         conflict_values.append(item['count'])
         
+    # ✅ CORRECCIÓN: block_data (no block_)
     # Datos para gráfico de bloques
     block_data = (
         cases
@@ -152,6 +155,7 @@ def admin_panel(request):
     )
     block_labels = []
     block_values = []
+    # ✅ CORRECCIÓN: for item in block_data (no block_)
     for item in block_data:
         # Procesar múltiples bloques
         if item['location_blocks']:
@@ -232,7 +236,8 @@ def register_case(request):
             case.case_number = f"JC-{year}-{month:02d}-{count:04d}"
             case.save()
 
-            resolution_methods = form.cleaned_data.get('resolution_method')
+            # ✅ CORRECCIÓN: Manejar resolution_methods como lista vacía si es None
+            resolution_methods = form.cleaned_data.get('resolution_method') or []
             if resolution_methods:
                 case.resolution_method = ', '.join(resolution_methods)
                 if 'otro' in resolution_methods:
@@ -243,8 +248,8 @@ def register_case(request):
                 case.other_conflict_type = form.cleaned_data.get('other_conflict_type')
                 case.save()
                 
-            # ✅ Guardar bloques
-            location_blocks = form.cleaned_data.get('location_blocks')
+            # ✅ CORRECCIÓN: Manejar location_blocks como lista vacía si es None
+            location_blocks = form.cleaned_data.get('location_blocks') or []
             if location_blocks:
                 case.location_blocks = ', '.join(location_blocks)
                 if 'otro' in location_blocks:
@@ -440,7 +445,7 @@ def edit_case(request, case_id):
             case = form.save(commit=False)
 
             # Actualizamos resolution_method (si aplica)
-            resolution_methods = form.cleaned_data.get('resolution_method')
+            resolution_methods = form.cleaned_data.get('resolution_method') or []
             if resolution_methods:
                 case.resolution_method = ', '.join(resolution_methods)
                 if 'otro' in resolution_methods:
@@ -451,7 +456,7 @@ def edit_case(request, case_id):
                 case.other_conflict_type = form.cleaned_data.get('other_conflict_type')
                 
             # ✅ Actualizamos location_blocks
-            location_blocks = form.cleaned_data.get('location_blocks')
+            location_blocks = form.cleaned_data.get('location_blocks') or []
             if location_blocks:
                 case.location_blocks = ', '.join(location_blocks)
                 if 'otro' in location_blocks:
