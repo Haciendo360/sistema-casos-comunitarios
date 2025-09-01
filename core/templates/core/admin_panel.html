@@ -115,6 +115,75 @@
         </div>
     </div>
 
+    <!-- Resumen de casos -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow h-100">
+                <div class="card-body">
+                    <div class="text-center">
+                        <h4>Total de Casos</h4>
+                        <h1 class="display-4">{{ total_cases }}</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow h-100">
+                <div class="card-body">
+                    <div class="text-center">
+                        <h4>En Trámite</h4>
+                        <h1 class="display-4">
+                            {% for status, label in CASE_STATUS %}
+                                {% if status == 'en_tramite' %}
+                                    {{ cases_by_status|get_item:label|default:0 }}
+                                {% endif %}
+                            {% endfor %}
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow h-100">
+                <div class="card-body">
+                    <div class="text-center">
+                        <h4>Resueltos</h4>
+                        <h1 class="display-4">
+                            {% for status, label in CASE_STATUS %}
+                                {% if status == 'resuelto' %}
+                                    {{ cases_by_status|get_item:label|default:0 }}
+                                {% endif %}
+                            {% endfor %}
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white shadow h-100">
+                <div class="card-body">
+                    <div class="text-center">
+                        <h4>Cerrados</h4>
+                        <h1 class="display-4">
+                            {% for status, label in CASE_STATUS %}
+                                {% if status == 'cerrado' %}
+                                    {{ cases_by_status|get_item:label|default:0 }}
+                                {% endif %}
+                            {% endfor %}
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón de descarga de reporte -->
+    <div class="mb-4 text-end">
+        <a href="{% url 'core:download_cases_csv' %}" class="btn btn-success btn-lg">
+            <i class="fas fa-download me-2"></i>Descargar Reporte de Casos
+        </a>
+    </div>
+
     <!-- Gráficos -->
     <div class="row mt-4">
         <!-- Gráfico de bloques -->
@@ -133,7 +202,7 @@
         <div class="col-md-4 mb-4">
             <div class="card shadow">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Casos por Estado</h5>
+                    <h5 class="mb-0">Casos por Estado (En trámite, Resuelto, Cerrado)</h5>
                 </div>
                 <div class="card-body">
                     <canvas id="statusChart" width="400" height="200"></canvas>

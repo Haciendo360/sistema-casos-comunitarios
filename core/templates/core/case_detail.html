@@ -6,9 +6,14 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <h2>Detalle del Caso: <strong>{{ case.case_number }}</strong></h2>
-                <a href="{% url 'core:judge_panel' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
+                <div>
+                    <a href="{% url 'core:judge_panel' %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Volver al panel
+                    </a>
+                    <a href="{% url 'core:register_case' %}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus"></i> Nuevo Caso
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -16,12 +21,18 @@
     <!-- Termómetro de progreso -->
     <div class="card shadow mb-4">
         <div class="card-body">
-            <h5><i class="fas fa-clock"></i> Seguimiento del caso</h5>
-            <p><strong>Estado:</strong> <span class="badge bg-info">{{ case.get_status_display }}</span></p>
-            <p><strong>Plazo:</strong> <span class="badge bg-{{ deadline_class }}">{{ deadline_status }}</span> ({{ days_elapsed }} de {{ max_days }} días)</p>
-            <div class="progress" style="height: 25px;">
-                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;">
-                    {{ progress }}%
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5><i class="fas fa-clock"></i> Seguimiento del caso</h5>
+                    <p><strong>Estado:</strong> <span class="badge bg-info">{{ case.get_status_display }}</span></p>
+                    <p><strong>Plazo:</strong> <span class="badge bg-{{ deadline_class }}">{{ deadline_status }}</span> ({{ days_elapsed }} de {{ max_days }} días)</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;">
+                            {{ progress }}%
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -57,10 +68,28 @@
 
     <!-- Detalles del conflicto -->
     <div class="card shadow mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Detalles del Conflicto</h5>
+        </div>
         <div class="card-body">
-            <h5><i class="fas fa-exclamation-triangle"></i> Detalles del Conflicto</h5>
             <p><strong>Descripción:</strong> {{ case.conflict_description }}</p>
             <p><strong>Lugar:</strong> {{ case.location }}</p>
+            <p><strong>Bloque(s):</strong> 
+                {% if case.location_blocks %}
+                    {% for block in case.location_blocks.split(',') %}
+                        {% with block=block|trim %}
+                            {% if block == 'otro' and case.other_location_block %}
+                                {{ case.other_location_block }}
+                            {% else %}
+                                {{ block|get_block_display }}
+                            {% endif %}
+                            {% if not forloop.last %}, {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+                {% else %}
+                    No especificado
+                {% endif %}
+            </p>
             <p><strong>Tipo:</strong> {{ case.get_conflict_type_display }}{% if case.other_conflict_type %} ({{ case.other_conflict_type }}){% endif %}</p>
             <p><strong>Valor estimado:</strong> {{ case.estimated_value|default:"No aplica" }}</p>
         </div>
@@ -68,12 +97,22 @@
 
     <!-- Resolución -->
     <div class="card shadow mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-handshake"></i> Resolución Solicitada</h5>
+        </div>
         <div class="card-body">
-            <h5><i class="fas fa-handshake"></i> Resolución Solicitada</h5>
             <p><strong>Método(s):</strong> 
                 {% if case.resolution_method %}
-                    {{ case.resolution_method }}
-                    {% if case.other_resolution_method %} ({{ case.other_resolution_method }}){% endif %}
+                    {% for method in case.resolution_method.split(',') %}
+                        {% with method=method|trim %}
+                            {% if method == 'otro' and case.other_resolution_method %}
+                                {{ case.other_resolution_method }}
+                            {% else %}
+                                {{ method|get_resolution_display }}
+                            {% endif %}
+                            {% if not forloop.last %}, {% endif %}
+                        {% endwith %}
+                    {% endfor %}
                 {% else %}
                     No especificado
                 {% endif %}
@@ -83,27 +122,93 @@
 
     <!-- Observaciones -->
     <div class="card shadow mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="fas fa-sticky-note"></i> Observaciones</h5>
+        </div>
         <div class="card-body">
-            <h5><i class="fas fa-sticky-note"></i> Observaciones</h5>
             <p>{{ case.notes|default:"No hay observaciones." }}</p>
         </div>
     </div>
 
-    <!-- Acciones -->
+    <!-- Información adicional -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información Adicional</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Juez asignado:</strong> {{ case.judge.get_full_name|default:case.judge.username }}</p>
+                    <p><strong>Fecha de registro:</strong> {{ case.date_registered|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Prórroga concedida:</strong> {% if case.extension_granted %}<span class="badge bg-success">Sí</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</p>
+                    <p><strong>Número de caso:</strong> {{ case.case_number }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones del juez -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-cogs"></i> Acciones del Juez</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'core:update_case_status' case.id %}">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="status" class="form-label">Actualizar estado del caso</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="">-- Seleccionar nuevo estado --</option>
+                            <option value="en_tramite" {% if case.status == 'en_tramite' %}selected{% endif %}>En trámite</option>
+                            <option value="resuelto" {% if case.status == 'resuelto' %}selected{% endif %}>Resuelto</option>
+                            <option value="cerrado" {% if case.status == 'cerrado' %}selected{% endif %}>Cerrado</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Actualizar Estado</button>
+                    </div>
+                </div>
+            </form>
+            
+            {% if deadline_status != 'Vencido' %}
+                <form method="post" action="{% url 'core:request_extension' case.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-warning w-100 mt-2">
+                        <i class="fas fa-hourglass-half me-2"></i>Solicitar Prórroga (15 días adicionales)
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Acciones adicionales -->
     <div class="text-center mt-4">
-        <form method="post" action="{% url 'core:request_extension' case.id %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-warning btn-lg me-3" {% if case.extension_granted %}disabled{% endif %}>
-                <i class="fas fa-calendar-plus"></i> 
-                {% if case.extension_granted %}
-                    Prórroga concedida
-                {% else %}
-                    Solicitar prórroga
-                {% endif %}
-            </button>
-        </form>
         <a href="{% url 'core:judge_panel' %}" class="btn btn-outline-secondary btn-lg">
-            <i class="fas fa-times"></i> Cerrar
+            <i class="fas fa-arrow-left"></i> Volver al panel
         </a>
     </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Función para mejorar la UX al cambiar el estado
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.getElementById('status');
+        
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function() {
+                if (this.value) {
+                    // Mostrar un mensaje de confirmación antes de enviar
+                    const statusText = this.options[this.selectedIndex].text;
+                    if (!confirm(`¿Estás seguro de cambiar el estado del caso a "${statusText}"?`)) {
+                        this.value = ''; // Resetear selección
+                    }
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

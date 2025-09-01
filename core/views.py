@@ -117,13 +117,17 @@ def admin_panel(request):
         count = cases.filter(status=status).count()
         cases_by_status[label] = count
 
-    # Datos para gráfico de casos por estado
-    status_labels = []  # ✅ Etiquetas: "Registrado", "En trámite", etc.
+    # Datos para gráfico de casos por estado (solo estados relevantes)
+    status_labels = []  # ✅ Etiquetas: "En trámite", "Resuelto", "Cerrado"
     status_values = []  # ✅ Valores: 5, 3, 2, etc.
+    
+    # ✅ Solo incluir estos estados en el gráfico
+    relevant_statuses = ['en_tramite', 'resuelto', 'cerrado']
     for status, label in Case.CASE_STATUS:
-        count = cases.filter(status=status).count()
-        status_labels.append(label)
-        status_values.append(count)
+        if status in relevant_statuses:
+            count = cases.filter(status=status).count()
+            status_labels.append(label)
+            status_values.append(count)
 
     # Datos para gráfico de tipos de conflicto
     conflict_data = (
@@ -309,12 +313,14 @@ def update_case_status(request, case_id):
 
     if request.method == 'POST':
         new_status = request.POST.get('status')
-        if new_status in dict(Case.CASE_STATUS).keys():
+        # ✅ Solo permitir ciertos estados para los jueces
+        allowed_statuses = ['en_tramite', 'resuelto', 'cerrado']
+        if new_status in allowed_statuses:
             case.status = new_status
             case.save()
             messages.success(request, f"Estado del caso actualizado a: {case.get_status_display()}")
         else:
-            messages.error(request, "Estado no válido.")
+            messages.error(request, "Estado no válido para un Juez de Paz.")
         return redirect('core:case_detail', case_id=case.id)
 
     return redirect('core:case_detail', case_id=case.id)
