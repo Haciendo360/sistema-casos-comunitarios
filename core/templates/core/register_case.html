@@ -92,12 +92,25 @@
                                     {{ form.location.label_tag }}
                                     {{ form.location }}
                                 </div>
+                                
+                                <!-- Bloques -->
+                                <div class="mb-3">
+                                    {{ form.location_blocks.label_tag }}
+                                    {{ form.location_blocks }}
+                                </div>
+                                {% if form.other_location_block %}
+                                <div class="mb-3" id="other-location-block-container" style="display: {% if 'otro' in form.location_blocks.value|default:'' %}block{% else %}none{% endif %};">
+                                    {{ form.other_location_block.label_tag }}
+                                    {{ form.other_location_block }}
+                                </div>
+                                {% endif %}
+                                
                                 <div class="mb-3">
                                     {{ form.conflict_type.label_tag }}
                                     {{ form.conflict_type }}
                                 </div>
                                 {% if form.other_conflict_type %}
-                                    <div class="mb-3">
+                                    <div class="mb-3" id="other-conflict-type-container" style="display: {% if form.conflict_type.value == 'otro' %}block{% else %}none{% endif %};">
                                         {{ form.other_conflict_type.label_tag }}
                                         {{ form.other_conflict_type }}
                                     </div>
@@ -120,7 +133,7 @@
                                     {{ form.resolution_method }}
                                 </div>
                                 {% if form.other_resolution_method %}
-                                    <div class="mb-3">
+                                    <div class="mb-3" id="other-resolution-method-container" style="display: {% if 'otro' in form.resolution_method.value|default:'' %}block{% else %}none{% endif %};">
                                         {{ form.other_resolution_method.label_tag }}
                                         {{ form.other_resolution_method }}
                                     </div>
@@ -176,4 +189,62 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Mostrar/Ocultar campo "Otro bloque" cuando se selecciona/deselecciona "OTRO"
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationBlocksCheckboxes = document.querySelectorAll('input[name="location_blocks"]');
+            const otherLocationBlockContainer = document.getElementById('other-location-block-container');
+            
+            function updateOtherLocationBlockVisibility() {
+                let isOtroSelected = false;
+                locationBlocksCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked && checkbox.value === 'otro') {
+                        isOtroSelected = true;
+                    }
+                });
+                otherLocationBlockContainer.style.display = isOtroSelected ? 'block' : 'none';
+            }
+            
+            // Inicializar visibilidad
+            updateOtherLocationBlockVisibility();
+            
+            // Agregar evento a cada checkbox
+            locationBlocksCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateOtherLocationBlockVisibility);
+            });
+            
+            // Para el tipo de conflicto
+            const conflictTypeSelect = document.querySelector('select[name="conflict_type"]');
+            const otherConflictTypeContainer = document.getElementById('other-conflict-type-container');
+            
+            if (conflictTypeSelect) {
+                conflictTypeSelect.addEventListener('change', function() {
+                    otherConflictTypeContainer.style.display = this.value === 'otro' ? 'block' : 'none';
+                });
+            }
+            
+            // Para los métodos de resolución
+            const resolutionMethodCheckboxes = document.querySelectorAll('input[name="resolution_method"]');
+            const otherResolutionMethodContainer = document.getElementById('other-resolution-method-container');
+            
+            function updateOtherResolutionMethodVisibility() {
+                let isOtroSelected = false;
+                resolutionMethodCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked && checkbox.value === 'otro') {
+                        isOtroSelected = true;
+                    }
+                });
+                otherResolutionMethodContainer.style.display = isOtroSelected ? 'block' : 'none';
+            }
+            
+            // Inicializar visibilidad
+            updateOtherResolutionMethodVisibility();
+            
+            // Agregar evento a cada checkbox
+            resolutionMethodCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateOtherResolutionMethodVisibility);
+            });
+        });
+    </script>
 {% endblock %}

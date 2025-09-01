@@ -36,8 +36,24 @@ class Case(models.Model):
         ('en_tramite', 'En trámite'),
         ('resuelto', 'Resuelto'),
         ('cerrado', 'Cerrado'),
-        ('prorroga', 'Prórroga'),
     ]
+    
+    # Opciones para los bloques
+    BLOCK_CHOICES = [
+        ('bloque_15', 'BLOQUE 15'),
+        ('bloque_16', 'BLOQUE 16'),
+        ('bloque_17', 'BLOQUE 17'),
+        ('bloque_22p', 'BLOQUE 22 P'),
+        ('bloque_23p', 'BLOQUE 23 P'),
+        ('bloque_24p', 'BLOQUE 24 P'),
+        ('bloque_25p', 'BLOQUE 25 P'),
+        ('bloque_18', 'BLOQUE 18'),
+        ('bloque_19', 'BLOQUE 19'),
+        ('bloque_20', 'BLOQUE 20'),
+        ('bloque_21', 'BLOQUE 21'),
+        ('otro', 'OTRO'),
+    ]
+    
 
     # Opciones de tipo de conflicto
     CONFLICT_TYPE_CHOICES = [
@@ -55,6 +71,19 @@ class Case(models.Model):
         max_length=20,
         choices=CASE_STATUS,
         default='registrado'
+    )
+    
+    location_blocks = models.CharField(
+        "Bloque(s) donde ocurre el conflicto", 
+        max_length=200,
+        blank=True,
+        null=True
+    )
+    other_location_block = models.CharField(
+        "Otro bloque", 
+        max_length=100,
+        blank=True,
+        null=True
     )
 
     # Número de caso y fecha
@@ -75,12 +104,12 @@ class Case(models.Model):
     conflict_description = models.TextField("Descripción del conflicto", blank=False)
     location = models.CharField("Lugar del conflicto", max_length=200, blank=False)
     conflict_type = models.CharField(
-    "Tipo de conflicto", 
-    max_length=50, 
-    choices=CONFLICT_TYPE_CHOICES, 
-    blank=False,
-    default='vecinal'  # ✅ Asegura que siempre tenga un valor
-)
+        "Tipo de conflicto", 
+        max_length=50, 
+        choices=CONFLICT_TYPE_CHOICES, 
+        blank=False,
+        default='vecinal'
+    )
     other_conflict_type = models.CharField("Otro tipo de conflicto", max_length=100, blank=True, null=True)
     estimated_value = models.DecimalField("Valor aproximado (patrimonial)", max_digits=12, decimal_places=2, blank=True, null=True)
 
@@ -198,12 +227,11 @@ class PlatformSettings(models.Model):
                 'primary_color': '#0057B7',
                 'secondary_color': '#FFD700'
             }   
-            
         )
-           
         return obj
-    
-    # ----------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------
 # ✅ SEÑALES: Registrar acciones automáticamente
 # - Cada vez que se crea, edita o elimina un caso
 # ----------------------------------------------------------------------------------
@@ -231,33 +259,6 @@ def log_case_deletion(sender, instance, **kwargs):
     AuditLog.objects.create(
         action='DELETED',
         case_number=instance.case_number,
-        performed_by=getattr(instance.judge, 'profile', None).user if hasattr(instance.judge, 'profile') else None,
+        performed_by=instance.judge,  # ✅ Corregido: directamente el juez
         details=f"El caso {instance.case_number} fue eliminado."
     )
-    
-# ----------------------------------------------------------------------------------
-# ✅ MODELO: Auditoría de Acciones
-# - Registra quién creó, editó o eliminó un caso
-# - No afecta el resto del sistema
-# ----------------------------------------------------------------------------------
-class AuditLog(models.Model):
-    ACTION_CHOICES = [
-        ('CREATED', 'Creado'),
-        ('UPDATED', 'Actualizado'),
-        ('DELETED', 'Eliminado'),
-    ]
-
-    action = models.CharField("Acción", max_length=10, choices=ACTION_CHOICES)
-    case_number = models.CharField("Número de Caso", max_length=20, blank=True, null=True)
-    performed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name="Realizado por")
-    timestamp = models.DateTimeField("Fecha y hora", auto_now_add=True)
-    details = models.TextField("Detalles", blank=True, null=True)
-
-    def __str__(self):
-        user_name = self.performed_by.get_full_name() or self.performed_by.username if self.performed_by else "Sistema"
-        return f"{self.get_action_display()} - {self.case_number or 'N/A'} por {user_name}"
-
-    class Meta:
-        verbose_name = "Registro de Auditoría"
-        verbose_name_plural = "Registros de Auditoría"
-        ordering = ['-timestamp']

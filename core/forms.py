@@ -129,6 +129,7 @@ class UserRegistrationForm(forms.Form):
 
 
 class CaseForm(forms.ModelForm):
+    
     CONFLICT_TYPE_CHOICES = [
         ('vecinal', 'Vecinal'),
         ('individual', 'Individual'),
@@ -144,6 +145,9 @@ class CaseForm(forms.ModelForm):
         ('equidad', 'Resolución en equidad'),
         ('otro', 'Otro'),
     ]
+    
+    # ✅ Opciones para los bloques (definidas aquí para asegurar acceso)
+    BLOCK_CHOICES = Case.BLOCK_CHOICES
 
     conflict_type = forms.ChoiceField(
         label="Tipo de conflicto",
@@ -168,6 +172,20 @@ class CaseForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
+    
+    # ✅ Campos para bloques (definidos como campos del formulario)
+    location_blocks = forms.MultipleChoiceField(
+        choices=BLOCK_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Bloque(s) donde ocurre el conflicto"
+    ) 
+    other_location_block = forms.CharField(
+        label="Especifique otro bloque",
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )  
 
     consentimiento_1 = forms.BooleanField(
         label="Confirmo que la información proporcionada es verdadera.",
@@ -184,8 +202,14 @@ class CaseForm(forms.ModelForm):
             'applicant_name', 'applicant_id', 'applicant_phone', 'applicant_email',
             'involved_name', 'involved_id',
             'conflict_description', 'location',
+            'conflict_type', 'other_conflict_type',  # ✅ Añadido conflict_type
             'estimated_value',
-            'notes'
+            'location_blocks',  # ✅ Añadido location_blocks
+            'other_location_block',  # ✅ Añadido other_location_block
+            'resolution_method', 'other_resolution_method',
+            'notes',
+            'status',  # Solo el admin puede cambiarlo
+            'consentimiento_1', 'consentimiento_2',
         ]
         widgets = {
             'conflict_description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
@@ -202,8 +226,12 @@ class CaseForm(forms.ModelForm):
             'involved_id': 'Cédula del involucrado',
             'conflict_description': 'Descripción del conflicto',
             'location': 'Lugar donde ocurre el conflicto',
+            'conflict_type': 'Tipo de conflicto',
+            'other_conflict_type': 'Especifique otro tipo de conflicto',
             'estimated_value': 'Valor aproximado (si aplica, en caso patrimonial)',
-            'notes': 'Observaciones adicionales'
+            'other_resolution_method': 'Otro medio de resolución',
+            'notes': 'Observaciones adicionales',
+            'status': 'Estado del caso',
         }
 
     def __init__(self, *args, **kwargs):
@@ -213,6 +241,12 @@ class CaseForm(forms.ModelForm):
             self.fields['resolution_method'].initial = [
                 method.strip() for method in self.instance.resolution_method.split(',') if method.strip()
             ]
+        # ✅ Inicializar checkboxes de bloques   
+        if self.instance.pk and self.instance.location_blocks:
+            self.fields['location_blocks'].initial = [
+                block.strip() for block in self.instance.location_blocks.split(',') if block.strip()
+            ]    
+            
         # ✅ Ocultar consentimientos si es edición (caso ya existe)
         if self.instance.pk:
             self.fields['consentimiento_1'].widget = forms.HiddenInput()
@@ -228,11 +262,17 @@ class CaseForm(forms.ModelForm):
         other_resolution_method = cleaned_data.get('other_resolution_method')
         conflict_type = cleaned_data.get('conflict_type')
         other_conflict_type = cleaned_data.get('other_conflict_type')
+        location_blocks = cleaned_data.get('location_blocks')
+        other_location_block = cleaned_data.get('other_location_block')
 
         if resolution_method and 'otro' in resolution_method and not other_resolution_method:
             self.add_error('other_resolution_method', 'Debe especificar el otro medio de resolución.')
 
         if conflict_type == 'otro' and not other_conflict_type:
             self.add_error('other_conflict_type', 'Debe especificar el otro tipo de conflicto.')
+        
+        # ✅ Validar "OTRO" en bloques
+        if location_blocks and 'otro' in location_blocks and not other_location_block:
+            self.add_error('other_location_block', 'Debe especificar el otro bloque.')
 
         return cleaned_data

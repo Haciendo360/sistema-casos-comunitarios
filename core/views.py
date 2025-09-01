@@ -138,26 +138,51 @@ def admin_panel(request):
         label = dict(Case.CONFLICT_TYPE_CHOICES).get(item['conflict_type'], item['conflict_type'])
         conflict_labels.append(label)
         conflict_values.append(item['count'])
+        
+    # Datos para gráfico de bloques
+    block_data = (
+        cases
+        .values('location_blocks')
+        .annotate(count=Count('location_blocks'))
+        .order_by('-count')
+    )
+    block_labels = []
+    block_values = []
+    for item in block_data:
+        # Procesar múltiples bloques
+        if item['location_blocks']:
+            blocks = [b.strip() for b in item['location_blocks'].split(',') if b.strip()]
+            for block in blocks:
+                # Convertir el código del bloque a su nombre legible
+                label = dict(Case.BLOCK_CHOICES).get(block, block)
+                if label in block_labels:
+                    idx = block_labels.index(label)
+                    block_values[idx] += item['count']
+                else:
+                    block_labels.append(label)
+                    block_values.append(item['count'])
 
     context = {
-    'pending_users': pending_users,
-    'cases': cases,
-    'total_cases': total_cases,
-    'cases_by_status': cases_by_status,
-    'CASE_STATUS': Case.CASE_STATUS,
-    'all_judges': User.objects.filter(profile__role='juez').distinct(),
-    'filter_status': status_filter,
-    'filter_judge': judge_filter,
-    'filter_date_from': date_from,
-    'filter_date_to': date_to,
-    'query': query,
-    'settings': settings,
-    # ✅ DATOS CORREGIDOS PARA GRÁFICOS
-    'status_labels': json.dumps(status_labels),
-    'status_values': json.dumps(status_values),
-    'conflict_labels': json.dumps(conflict_labels),
-    'conflict_values': json.dumps(conflict_values),
-}
+        'pending_users': pending_users,
+        'cases': cases,
+        'total_cases': total_cases,
+        'cases_by_status': cases_by_status,
+        'CASE_STATUS': Case.CASE_STATUS,
+        'all_judges': User.objects.filter(profile__role='juez').distinct(),
+        'filter_status': status_filter,
+        'filter_judge': judge_filter,
+        'filter_date_from': date_from,
+        'filter_date_to': date_to,
+        'query': query,
+        'settings': settings,
+        # ✅ DATOS CORREGIDOS PARA GRÁFICOS
+        'status_labels': json.dumps(status_labels),
+        'status_values': json.dumps(status_values),
+        'conflict_labels': json.dumps(conflict_labels),
+        'conflict_values': json.dumps(conflict_values),
+        'block_labels': json.dumps(block_labels),
+        'block_values': json.dumps(block_values),
+    }
     return render(request, 'core/admin_panel.html', context)
 
 
@@ -212,6 +237,14 @@ def register_case(request):
 
             if case.conflict_type == 'otro':
                 case.other_conflict_type = form.cleaned_data.get('other_conflict_type')
+                case.save()
+                
+            # ✅ Guardar bloques
+            location_blocks = form.cleaned_data.get('location_blocks')
+            if location_blocks:
+                case.location_blocks = ', '.join(location_blocks)
+                if 'otro' in location_blocks:
+                    case.other_location_block = form.cleaned_data.get('other_location_block')
                 case.save()
 
             messages.success(request, f'Caso registrado con éxito. Número de caso: {case.case_number}')
@@ -410,6 +443,13 @@ def edit_case(request, case_id):
             # Actualizamos other_conflict_type si el tipo es "otro"
             if case.conflict_type == 'otro':
                 case.other_conflict_type = form.cleaned_data.get('other_conflict_type')
+                
+            # ✅ Actualizamos location_blocks
+            location_blocks = form.cleaned_data.get('location_blocks')
+            if location_blocks:
+                case.location_blocks = ', '.join(location_blocks)
+                if 'otro' in location_blocks:
+                    case.other_location_block = form.cleaned_data.get('other_location_block')
 
             # Guardamos el caso en la base de datos
             case.save()
@@ -428,6 +468,11 @@ def edit_case(request, case_id):
         if case.resolution_method:
             form.fields['resolution_method'].initial = [
                 method.strip() for method in case.resolution_method.split(',') if method.strip()
+            ]
+        # ✅ Inicializamos los checkboxes de bloques
+        if case.location_blocks:
+            form.fields['location_blocks'].initial = [
+                block.strip() for block in case.location_blocks.split(',') if block.strip()
             ]
 
     # Cargamos la configuración de la plataforma
@@ -479,7 +524,8 @@ def download_cases_csv(request):
     writer.writerow([
         'Número de Caso', 'Fecha de Registro', 'Solicitante', 'Cédula Solicitante',
         'Involucrado', 'Cédula Involucrado', 'Lugar', 'Tipo de Conflicto',
-        'Valor Estimado', 'Estado', 'Juez Asignado', 'Prórroga', 'Observaciones'
+        'Bloque(s)', 'Otro bloque', 'Valor Estimado', 'Estado', 'Juez Asignado', 
+        'Prórroga', 'Observaciones'
     ])
 
     for case in cases:
@@ -492,6 +538,8 @@ def download_cases_csv(request):
             case.involved_id,
             case.location,
             case.get_conflict_type_display(),
+            case.location_blocks,
+            case.other_location_block or '',
             case.estimated_value or '',
             case.get_status_display(),
             case.judge.username,
@@ -589,5 +637,3 @@ def reset_password(request, uidb64, token):
     else:
         messages.error(request, "El enlace de recuperación es inválido o ha expirado.")
         return redirect('core:login')
-    
-    
