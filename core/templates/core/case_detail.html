@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load custom_filters %}  {# ✅ CARGAR FILTROS PERSONALIZADOS #}
 {% block title %}Detalle del Caso: {{ case.case_number }}{% endblock %}
 
 {% block content %}
@@ -81,7 +82,7 @@
                             {% if block == 'otro' and case.other_location_block %}
                                 {{ case.other_location_block }}
                             {% else %}
-                                {{ block|get_block_display }}
+                                {{ block|get_block_display }}  {# ✅ USAR FILTRO PERSONALIZADO #}
                             {% endif %}
                             {% if not forloop.last %}, {% endif %}
                         {% endwith %}
@@ -108,7 +109,7 @@
                             {% if method == 'otro' and case.other_resolution_method %}
                                 {{ case.other_resolution_method }}
                             {% else %}
-                                {{ method|get_resolution_display }}
+                                {{ method|get_resolution_display }}  {# ✅ USAR FILTRO PERSONALIZADO #}
                             {% endif %}
                             {% if not forloop.last %}, {% endif %}
                         {% endwith %}

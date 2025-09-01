@@ -117,7 +117,7 @@ def admin_panel(request):
         count = cases.filter(status=status).count()
         cases_by_status[label] = count
 
-    # ✅ CORRECCIÓN: Manejo seguro de datos para gráficos
+    # ✅ CORRECCIÓN CRÍTICA: Manejo seguro de datos para gráficos
     # Datos para gráfico de casos por estado
     status_labels = []  # ✅ Etiquetas: "En trámite", "Resuelto", "Cerrado"
     status_values = []  # ✅ Valores: 5, 3, 2, etc.
@@ -130,7 +130,7 @@ def admin_panel(request):
             status_labels.append(label)
             status_values.append(count)
 
-    # ✅ CORRECCIÓN: Manejo seguro de conflict_data
+    # ✅ CORRECCIÓN CRÍTICA: Manejo seguro de conflict_data
     # Datos para gráfico de tipos de conflicto
     conflict_data = (
         cases
@@ -140,13 +140,13 @@ def admin_panel(request):
     )
     conflict_labels = []
     conflict_values = []
-    # ✅ Bucle corregido: for item in conflict_data
+    # ✅ Bucle corregido: for item in conflict_data (no conflict_)
     for item in conflict_data:
         label = dict(Case.CONFLICT_TYPE_CHOICES).get(item['conflict_type'], item['conflict_type'])
         conflict_labels.append(label)
         conflict_values.append(item['count'])
         
-    # ✅ CORRECCIÓN: Manejo seguro de block_data
+    # ✅ CORRECCIÓN CRÍTICA: Manejo seguro de block_data
     # Datos para gráfico de bloques
     block_data = (
         cases
@@ -156,7 +156,7 @@ def admin_panel(request):
     )
     block_labels = []
     block_values = []
-    # ✅ Bucle corregido: for item in block_data
+    # ✅ Bucle corregido: for item in block_data (no block_)
     for item in block_data:
         # Procesar múltiples bloques
         if item['location_blocks']:
@@ -237,7 +237,7 @@ def register_case(request):
             case.case_number = f"JC-{year}-{month:02d}-{count:04d}"
             case.save()
 
-            # ✅ CORRECCIÓN: Manejar resolution_methods como lista vacía si es None
+            # ✅ CORRECCIÓN CRÍTICA: Manejar resolution_methods como lista vacía si es None
             resolution_methods = form.cleaned_data.get('resolution_method') or []
             if resolution_methods:
                 case.resolution_method = ', '.join(resolution_methods)
@@ -249,7 +249,7 @@ def register_case(request):
                 case.other_conflict_type = form.cleaned_data.get('other_conflict_type')
                 case.save()
                 
-            # ✅ CORRECCIÓN: Manejar location_blocks como lista vacía si es None
+            # ✅ CORRECCIÓN CRÍTICA: Manejar location_blocks como lista vacía si es None
             location_blocks = form.cleaned_data.get('location_blocks') or []
             if location_blocks:
                 case.location_blocks = ', '.join(location_blocks)
@@ -277,7 +277,7 @@ def case_detail(request, case_id):
         return redirect('core:home')
 
     settings = PlatformSettings.load()
-    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    # ✅ CORRECCIÓN CRÍTICA: Manejo seguro de get_object_or_404
     try:
         case = get_object_or_404(Case, id=case_id, judge=request.user)
     except Case.DoesNotExist:
@@ -320,7 +320,7 @@ def update_case_status(request, case_id):
         return redirect('core:home')
 
     settings = PlatformSettings.load()
-    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    # ✅ CORRECCIÓN CRÍTICA: Manejo seguro de get_object_or_404
     try:
         case = get_object_or_404(Case, id=case_id, judge=request.user)
     except Case.DoesNotExist:
@@ -350,7 +350,7 @@ def request_extension(request, case_id):
         return redirect('core:home')
 
     settings = PlatformSettings.load()
-    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    # ✅ CORRECCIÓN CRÍTICA: Manejo seguro de get_object_or_404
     try:
         case = get_object_or_404(Case, id=case_id, judge=request.user)
     except Case.DoesNotExist:
@@ -420,7 +420,7 @@ def admin_case_detail(request, case_id):
         return redirect('core:home')
 
     settings = PlatformSettings.load()
-    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    # ✅ CORRECCIÓN CRÍTICA: Manejo seguro de get_object_or_404
     try:
         case = get_object_or_404(Case, id=case_id)
     except Case.DoesNotExist:
@@ -465,7 +465,7 @@ def edit_case(request, case_id):
         messages.error(request, "Acceso denegado.")
         return redirect('core:home')
 
-    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    # ✅ CORRECCIÓN CRÍTICA: Manejo seguro de get_object_or_404
     try:
         case = get_object_or_404(Case, id=case_id)
     except Case.DoesNotExist:
@@ -541,7 +541,7 @@ def delete_case(request, case_id):
         messages.error(request, "Acceso denegado.")
         return redirect('core:home')
 
-    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    # ✅ CORRECCIÓN CRÍTICA: Manejo seguro de get_object_or_404
     try:
         case = get_object_or_404(Case, id=case_id)
     except Case.DoesNotExist:

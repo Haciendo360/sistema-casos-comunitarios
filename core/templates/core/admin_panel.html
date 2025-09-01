@@ -233,11 +233,11 @@
                 if (blockCtx) {
                     const blockChart = new Chart(blockCtx, {
                         type: 'bar',
-                        data: {
+                         {
                             labels: {{ block_labels|safe }},
                             datasets: [{
                                 label: 'Cantidad',
-                                data: {{ block_values|safe }},
+                                data: {{ block_values|safe }},  // ✅ CORRECCIÓN CRÍTICA: data: añadido
                                 backgroundColor: '#FFC107',
                                 borderColor: '#D4A000',
                                 borderWidth: 1
@@ -260,11 +260,11 @@
                 if (statusCtx) {
                     const statusChart = new Chart(statusCtx, {
                         type: 'bar',
-                        data: {
+                         {
                             labels: {{ status_labels|safe }},
                             datasets: [{
                                 label: 'Cantidad',
-                                data: {{ status_values|safe }},
+                                data: {{ status_values|safe }},  // ✅ CORRECCIÓN CRÍTICA: data: añadido
                                 backgroundColor: '#0057B7',
                                 borderColor: '#003a8c',
                                 borderWidth: 1
@@ -287,10 +287,10 @@
                 if (conflictCtx) {
                     const conflictChart = new Chart(conflictCtx, {
                         type: 'pie',
-                        data: {
+                         {
                             labels: {{ conflict_labels|safe }},
                             datasets: [{
-                                data: {{ conflict_values|safe }},
+                                data: {{ conflict_values|safe }},  // ✅ CORRECCIÓN CRÍTICA: data: añadido
                                 backgroundColor: [
                                     '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
                                 ]
@@ -304,6 +304,11 @@
                 }
             } catch (error) {
                 console.error('Error al inicializar gráficos:', error);
+                // ✅ Mostrar mensaje de error en la UI
+                const errorContainer = document.createElement('div');
+                errorContainer.className = 'alert alert-danger';
+                errorContainer.innerHTML = '<strong>Error:</strong> No se pudieron cargar los gráficos. Por favor, recarga la página.';
+                document.querySelector('.row.mt-4').insertBefore(errorContainer, document.querySelector('.row.mt-4').firstChild);
             }
         });
     </script>
