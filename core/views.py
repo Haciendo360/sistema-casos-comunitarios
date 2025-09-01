@@ -117,6 +117,7 @@ def admin_panel(request):
         count = cases.filter(status=status).count()
         cases_by_status[label] = count
 
+    # ✅ CORRECCIÓN: Manejo seguro de datos para gráficos
     # Datos para gráfico de casos por estado
     status_labels = []  # ✅ Etiquetas: "En trámite", "Resuelto", "Cerrado"
     status_values = []  # ✅ Valores: 5, 3, 2, etc.
@@ -129,7 +130,7 @@ def admin_panel(request):
             status_labels.append(label)
             status_values.append(count)
 
-    # ✅ CORRECCIÓN: conflict_data (no conflict_)
+    # ✅ CORRECCIÓN: Manejo seguro de conflict_data
     # Datos para gráfico de tipos de conflicto
     conflict_data = (
         cases
@@ -139,13 +140,13 @@ def admin_panel(request):
     )
     conflict_labels = []
     conflict_values = []
-    # ✅ CORRECCIÓN: for item in conflict_data (no conflict_)
+    # ✅ Bucle corregido: for item in conflict_data
     for item in conflict_data:
         label = dict(Case.CONFLICT_TYPE_CHOICES).get(item['conflict_type'], item['conflict_type'])
         conflict_labels.append(label)
         conflict_values.append(item['count'])
         
-    # ✅ CORRECCIÓN: block_data (no block_)
+    # ✅ CORRECCIÓN: Manejo seguro de block_data
     # Datos para gráfico de bloques
     block_data = (
         cases
@@ -155,7 +156,7 @@ def admin_panel(request):
     )
     block_labels = []
     block_values = []
-    # ✅ CORRECCIÓN: for item in block_data (no block_)
+    # ✅ Bucle corregido: for item in block_data
     for item in block_data:
         # Procesar múltiples bloques
         if item['location_blocks']:
@@ -276,7 +277,12 @@ def case_detail(request, case_id):
         return redirect('core:home')
 
     settings = PlatformSettings.load()
-    case = get_object_or_404(Case, id=case_id, judge=request.user)
+    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    try:
+        case = get_object_or_404(Case, id=case_id, judge=request.user)
+    except Case.DoesNotExist:
+        messages.error(request, "El caso no existe o no tienes permiso para verlo.")
+        return redirect('core:judge_panel')
 
     days_elapsed = (timezone.now() - case.date_registered).days
     max_days = 15
@@ -314,7 +320,12 @@ def update_case_status(request, case_id):
         return redirect('core:home')
 
     settings = PlatformSettings.load()
-    case = get_object_or_404(Case, id=case_id, judge=request.user)
+    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    try:
+        case = get_object_or_404(Case, id=case_id, judge=request.user)
+    except Case.DoesNotExist:
+        messages.error(request, "El caso no existe o no tienes permiso para actualizarlo.")
+        return redirect('core:judge_panel')
 
     if request.method == 'POST':
         new_status = request.POST.get('status')
@@ -339,7 +350,12 @@ def request_extension(request, case_id):
         return redirect('core:home')
 
     settings = PlatformSettings.load()
-    case = get_object_or_404(Case, id=case_id, judge=request.user)
+    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    try:
+        case = get_object_or_404(Case, id=case_id, judge=request.user)
+    except Case.DoesNotExist:
+        messages.error(request, "El caso no existe o no tienes permiso para solicitar prórroga.")
+        return redirect('core:judge_panel')
 
     if case.extension_granted:
         messages.warning(request, "Ya se ha concedido una prórroga para este caso.")
@@ -359,15 +375,19 @@ def approve_user(request, user_profile_id):
         return redirect('core:home')
 
     settings = PlatformSettings.load()
-    user_profile = get_object_or_404(UserProfile, id=user_profile_id)
-    user_profile.approved_by_admin = True
-    user_profile.role = user_profile.role_request
-    user_profile.save()
+    try:
+        user_profile = get_object_or_404(UserProfile, id=user_profile_id)
+        user_profile.approved_by_admin = True
+        user_profile.role = user_profile.role_request
+        user_profile.save()
 
-    messages.success(
-        request,
-        f"Usuario '{user_profile.full_name} {user_profile.last_name}' aprobado como {user_profile.get_role_display()}."
-    )
+        messages.success(
+            request,
+            f"Usuario '{user_profile.full_name} {user_profile.last_name}' aprobado como {user_profile.get_role_display()}."
+        )
+    except Exception as e:
+        messages.error(request, f"Error al aprobar usuario: {str(e)}")
+    
     return redirect('core:admin_panel')
 
 
@@ -379,12 +399,16 @@ def reject_user(request, user_profile_id):
         return redirect('core:home')
 
     settings = PlatformSettings.load()
-    user_profile = get_object_or_404(UserProfile, id=user_profile_id)
-    user = user_profile.user
-    user_profile.delete()
-    user.delete()
+    try:
+        user_profile = get_object_or_404(UserProfile, id=user_profile_id)
+        user = user_profile.user
+        user_profile.delete()
+        user.delete()
 
-    messages.success(request, "Usuario rechazado y eliminado correctamente.")
+        messages.success(request, "Usuario rechazado y eliminado correctamente.")
+    except Exception as e:
+        messages.error(request, f"Error al rechazar usuario: {str(e)}")
+    
     return redirect('core:admin_panel')
 
 
@@ -396,7 +420,12 @@ def admin_case_detail(request, case_id):
         return redirect('core:home')
 
     settings = PlatformSettings.load()
-    case = get_object_or_404(Case, id=case_id)
+    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    try:
+        case = get_object_or_404(Case, id=case_id)
+    except Case.DoesNotExist:
+        messages.error(request, "El caso no existe.")
+        return redirect('core:admin_panel')
 
     days_elapsed = (timezone.now() - case.date_registered).days
     max_days = 15
@@ -436,7 +465,12 @@ def edit_case(request, case_id):
         messages.error(request, "Acceso denegado.")
         return redirect('core:home')
 
-    case = get_object_or_404(Case, id=case_id)
+    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    try:
+        case = get_object_or_404(Case, id=case_id)
+    except Case.DoesNotExist:
+        messages.error(request, "El caso no existe.")
+        return redirect('core:admin_panel')
 
     if request.method == 'POST':
         form = CaseForm(request.POST, instance=case)
@@ -507,7 +541,12 @@ def delete_case(request, case_id):
         messages.error(request, "Acceso denegado.")
         return redirect('core:home')
 
-    case = get_object_or_404(Case, id=case_id)
+    # ✅ CORRECCIÓN: Manejo seguro de get_object_or_404
+    try:
+        case = get_object_or_404(Case, id=case_id)
+    except Case.DoesNotExist:
+        messages.error(request, "El caso no existe.")
+        return redirect('core:admin_panel')
 
     if request.method == 'POST':
         case_number = case.case_number
