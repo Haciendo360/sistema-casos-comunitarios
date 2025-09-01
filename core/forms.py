@@ -202,13 +202,12 @@ class CaseForm(forms.ModelForm):
             'applicant_name', 'applicant_id', 'applicant_phone', 'applicant_email',
             'involved_name', 'involved_id',
             'conflict_description', 'location',
-            'conflict_type', 'other_conflict_type',  # ✅ Añadido conflict_type
+            'conflict_type', 'other_conflict_type',
             'estimated_value',
-            'location_blocks',  # ✅ Añadido location_blocks
-            'other_location_block',  # ✅ Añadido other_location_block
+            'location_blocks',
+            'other_location_block',
             'resolution_method', 'other_resolution_method',
             'notes',
-            'status',  # Solo el admin puede cambiarlo
             'consentimiento_1', 'consentimiento_2',
         ]
         widgets = {
@@ -231,11 +230,16 @@ class CaseForm(forms.ModelForm):
             'estimated_value': 'Valor aproximado (si aplica, en caso patrimonial)',
             'other_resolution_method': 'Otro medio de resolución',
             'notes': 'Observaciones adicionales',
-            'status': 'Estado del caso',
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # ✅ Eliminar el campo status si es un nuevo caso
+        if not self.instance.pk:
+            if 'status' in self.fields:
+                del self.fields['status']
+        
         # Inicializar checkboxes de resolución
         if self.instance.pk and self.instance.resolution_method:
             self.fields['resolution_method'].initial = [
