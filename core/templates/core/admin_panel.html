@@ -237,7 +237,7 @@
                             labels: {{ block_labels|safe }},
                             datasets: [{
                                 label: 'Cantidad',
-                                data: {{ block_values|safe }},  // ✅ CORRECCIÓN CRÍTICA:  añadido
+                                data: {{ block_values|safe }},
                                 backgroundColor: '#FFC107',
                                 borderColor: '#D4A000',
                                 borderWidth: 1
@@ -264,7 +264,7 @@
                             labels: {{ status_labels|safe }},
                             datasets: [{
                                 label: 'Cantidad',
-                                 {{ status_values|safe }},  // ✅ CORRECCIÓN CRÍTICA:  añadido
+                                 {{ status_values|safe }},
                                 backgroundColor: '#0057B7',
                                 borderColor: '#003a8c',
                                 borderWidth: 1
@@ -290,7 +290,7 @@
                          {
                             labels: {{ conflict_labels|safe }},
                             datasets: [{
-                                 {{ conflict_values|safe }},  // ✅ CORRECCIÓN CRÍTICA:  añadido
+                                 {{ conflict_values|safe }},
                                 backgroundColor: [
                                     '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
                                 ]

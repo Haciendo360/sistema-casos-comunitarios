@@ -140,8 +140,8 @@ def admin_panel(request):
     )
     conflict_labels = []
     conflict_values = []
-    # ✅ Bucle corregido: for item in conflict_data (no conflict_)
-    for item in conflict_data:  # ✅ CORRECCIÓN: conflict_data en lugar de conflict_
+    # ✅ Bucle corregido: for item in conflict_data
+    for item in conflict_data:
         label = dict(Case.CONFLICT_TYPE_CHOICES).get(item['conflict_type'], item['conflict_type'])
         conflict_labels.append(label)
         conflict_values.append(item['count'])
@@ -156,8 +156,8 @@ def admin_panel(request):
     )
     block_labels = []
     block_values = []
-    # ✅ Bucle corregido: for item in block_data (no block_)
-    for item in block_data:  # ✅ CORRECCIÓN: block_data en lugar de block_
+    # ✅ Bucle corregido: for item in block_data
+    for item in block_data:
         # Procesar múltiples bloques
         if item['location_blocks']:
             blocks = [b.strip() for b in item['location_blocks'].split(',') if b.strip()]
