@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.utils import timezone
+import json
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -26,6 +27,14 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = "Perfil de Usuario"
         verbose_name_plural = "Perfiles de Usuario"
+    
+    def get_role_display(self):
+        """Método seguro para obtener el nombre del rol"""
+        return dict(self.ROLE_CHOICES).get(self.role, self.role)
+    
+    def get_role_request_display(self):
+        """Método seguro para obtener el nombre del rol solicitado"""
+        return dict(self.ROLE_CHOICES).get(self.role_request, self.role_request)
 
 
 class Case(models.Model):
@@ -54,7 +63,6 @@ class Case(models.Model):
         ('otro', 'OTRO'),
     ]
     
-
     # Opciones de tipo de conflicto
     CONFLICT_TYPE_CHOICES = [
         ('vecinal', 'Vecinal'),
@@ -62,6 +70,14 @@ class Case(models.Model):
         ('comunitario', 'Comunitario'),
         ('contravencion', 'Contravención sin privación de libertad'),
         ('patrimonial', 'Obligaciones patrimoniales hasta cinco salarios básicos'),
+        ('otro', 'Otro'),
+    ]
+    
+    # Opciones de método de resolución
+    RESOLUTION_METHOD_CHOICES = [
+        ('conciliacion', 'Conciliación'),
+        ('mediacion', 'Mediación'),
+        ('equidad', 'Resolución en equidad'),
         ('otro', 'Otro'),
     ]
 
@@ -73,14 +89,29 @@ class Case(models.Model):
         default='registrado'
     )
     
+    # ✅ CORRECCIÓN CRÍTICA: Aumentar longitud para almacenar múltiples bloques
     location_blocks = models.CharField(
         "Bloque(s) donde ocurre el conflicto", 
-        max_length=200,
+        max_length=500,  # ✅ Aumentado de 200 a 500
         blank=True,
         null=True
     )
     other_location_block = models.CharField(
         "Otro bloque", 
+        max_length=100,
+        blank=True,
+        null=True
+    )
+    
+    # ✅ CORRECCIÓN CRÍTICA: Aumentar longitud para almacenar múltiples métodos
+    resolution_method = models.CharField(
+        "Medio(s) de resolución", 
+        max_length=500,  # ✅ Aumentado para múltiples métodos
+        blank=True,
+        null=True
+    )
+    other_resolution_method = models.CharField(
+        "Otro medio de resolución", 
         max_length=100,
         blank=True,
         null=True
@@ -113,10 +144,6 @@ class Case(models.Model):
     other_conflict_type = models.CharField("Otro tipo de conflicto", max_length=100, blank=True, null=True)
     estimated_value = models.DecimalField("Valor aproximado (patrimonial)", max_digits=12, decimal_places=2, blank=True, null=True)
 
-    # Medio de resolución
-    resolution_method = models.CharField("Medio de resolución", max_length=200, blank=True, null=True)
-    other_resolution_method = models.CharField("Otro medio", max_length=100, blank=True, null=True)
-
     # Observaciones
     notes = models.TextField("Observaciones adicionales", blank=True, null=True)
 
@@ -136,7 +163,37 @@ class Case(models.Model):
     class Meta:
         verbose_name = "Caso Comunitario"
         verbose_name_plural = "Casos Comunitarios"
-
+        ordering = ['-date_registered']
+    
+    def get_status_display(self):
+        """Método seguro para obtener el nombre del estado"""
+        return dict(self.CASE_STATUS).get(self.status, self.status)
+    
+    def get_conflict_type_display(self):
+        """Método seguro para obtener el nombre del tipo de conflicto"""
+        return dict(self.CONFLICT_TYPE_CHOICES).get(self.conflict_type, self.conflict_type)
+    
+    def get_location_blocks_list(self):
+        """Convierte location_blocks de cadena a lista"""
+        if not self.location_blocks:
+            return []
+        return [block.strip() for block in self.location_blocks.split(',') if block.strip()]
+    
+    def get_location_blocks_display(self):
+        """Convierte los códigos de bloques a nombres legibles"""
+        blocks = self.get_location_blocks_list()
+        return [dict(self.BLOCK_CHOICES).get(block, block) for block in blocks]
+    
+    def get_resolution_method_list(self):
+        """Convierte resolution_method de cadena a lista"""
+        if not self.resolution_method:
+            return []
+        return [method.strip() for method in self.resolution_method.split(',') if method.strip()]
+    
+    def get_resolution_method_display(self):
+        """Convierte los códigos de métodos a nombres legibles"""
+        methods = self.get_resolution_method_list()
+        return [dict(self.RESOLUTION_METHOD_CHOICES).get(method, method) for method in methods]
 
 # ----------------------------------------------------------------------------------
 # ✅ MODELO: Auditoría de Acciones
@@ -259,6 +316,6 @@ def log_case_deletion(sender, instance, **kwargs):
     AuditLog.objects.create(
         action='DELETED',
         case_number=instance.case_number,
-        performed_by=instance.judge,  # ✅ Corregido: directamente el juez
+        performed_by=instance.judge,
         details=f"El caso {instance.case_number} fue eliminado."
     )

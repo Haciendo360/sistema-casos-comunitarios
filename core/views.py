@@ -140,7 +140,7 @@ def admin_panel(request):
     )
     conflict_labels = []
     conflict_values = []
-    # ✅ Bucle corregido: for item in conflict_data
+    # ✅ Bucle corregido: for item in conflict_data (no conflict_)
     for item in conflict_data:
         label = dict(Case.CONFLICT_TYPE_CHOICES).get(item['conflict_type'], item['conflict_type'])
         conflict_labels.append(label)
@@ -156,7 +156,7 @@ def admin_panel(request):
     )
     block_labels = []
     block_values = []
-    # ✅ Bucle corregido: for item in block_data
+    # ✅ Bucle corregido: for item in block_data (no block_)
     for item in block_data:
         # Procesar múltiples bloques
         if item['location_blocks']:
@@ -184,13 +184,13 @@ def admin_panel(request):
         'filter_date_to': date_to,
         'query': query,
         'settings': settings,
-        # ✅ DATOS CORREGIDOS PARA GRÁFICOS
-        'status_labels': json.dumps(status_labels),
-        'status_values': json.dumps(status_values),
-        'conflict_labels': json.dumps(conflict_labels),
-        'conflict_values': json.dumps(conflict_values),
-        'block_labels': json.dumps(block_labels),
-        'block_values': json.dumps(block_values),
+        # ✅ CORRECCIÓN CRÍTICA: Serialización segura
+        'status_labels': json.dumps(status_labels or []),
+        'status_values': json.dumps(status_values or []),
+        'conflict_labels': json.dumps(conflict_labels or []),
+        'conflict_values': json.dumps(conflict_values or []),
+        'block_labels': json.dumps(block_labels or []),
+        'block_values': json.dumps(block_values or []),
     }
     return render(request, 'core/admin_panel.html', context)
 

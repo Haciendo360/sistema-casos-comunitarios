@@ -231,76 +231,100 @@
                 // Gráfico de bloques
                 const blockCtx = document.getElementById('blockChart');
                 if (blockCtx) {
-                    const blockChart = new Chart(blockCtx, {
-                        type: 'bar',
-                         {
-                            labels: {{ block_labels|safe }},
-                            datasets: [{
-                                label: 'Cantidad',
-                                data: {{ block_values|safe }},
-                                backgroundColor: '#FFC107',
-                                borderColor: '#D4A000',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: {
-                                    beginAtZero: true
+                    // ✅ CORRECCIÓN CRÍTICA: Verificar datos antes de crear el gráfico
+                    const blockLabels = {{ block_labels|safe }};
+                    const blockValues = {{ block_values|safe }};
+                    
+                    if (blockLabels && blockValues && blockLabels.length > 0) {
+                        const blockChart = new Chart(blockCtx, {
+                            type: 'bar',
+                             {
+                                labels: blockLabels,
+                                datasets: [{
+                                    label: 'Cantidad',
+                                     blockValues,
+                                    backgroundColor: '#FFC107',
+                                    borderColor: '#D4A000',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
+                    } else {
+                        blockCtx.parentElement.innerHTML = '<div class="alert alert-info">No hay datos para mostrar en este gráfico.</div>';
+                    }
                 }
 
                 // Gráfico de casos por estado (barras)
                 const statusCtx = document.getElementById('statusChart');
                 if (statusCtx) {
-                    const statusChart = new Chart(statusCtx, {
-                        type: 'bar',
-                         {
-                            labels: {{ status_labels|safe }},
-                            datasets: [{
-                                label: 'Cantidad',
-                                 {{ status_values|safe }},
-                                backgroundColor: '#0057B7',
-                                borderColor: '#003a8c',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: {
-                                    beginAtZero: true
+                    // ✅ CORRECCIÓN CRÍTICA: Verificar datos antes de crear el gráfico
+                    const statusLabels = {{ status_labels|safe }};
+                    const statusValues = {{ status_values|safe }};
+                    
+                    if (statusLabels && statusValues && statusLabels.length > 0) {
+                        const statusChart = new Chart(statusCtx, {
+                            type: 'bar',
+                             {
+                                labels: statusLabels,
+                                datasets: [{
+                                    label: 'Cantidad',
+                                    data: statusValues,
+                                    backgroundColor: '#0057B7',
+                                    borderColor: '#003a8c',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
+                    } else {
+                        statusCtx.parentElement.innerHTML = '<div class="alert alert-info">No hay datos para mostrar en este gráfico.</div>';
+                    }
                 }
 
                 // Gráfico de tipos de conflicto (pastel)
                 const conflictCtx = document.getElementById('conflictChart');
                 if (conflictCtx) {
-                    const conflictChart = new Chart(conflictCtx, {
-                        type: 'pie',
-                         {
-                            labels: {{ conflict_labels|safe }},
-                            datasets: [{
-                                 {{ conflict_values|safe }},
-                                backgroundColor: [
-                                    '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
-                                ]
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false
-                        }
-                    });
+                    // ✅ CORRECCIÓN CRÍTICA: Verificar datos antes de crear el gráfico
+                    const conflictLabels = {{ conflict_labels|safe }};
+                    const conflictValues = {{ conflict_values|safe }};
+                    
+                    if (conflictLabels && conflictValues && conflictLabels.length > 0) {
+                        const conflictChart = new Chart(conflictCtx, {
+                            type: 'pie',
+                             {
+                                labels: conflictLabels,
+                                datasets: [{
+                                    data: conflictValues,
+                                    backgroundColor: [
+                                        '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
+                                    ]
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false
+                            }
+                        });
+                    } else {
+                        conflictCtx.parentElement.innerHTML = '<div class="alert alert-info">No hay datos para mostrar en este gráfico.</div>';
+                    }
                 }
             } catch (error) {
                 console.error('Error al inicializar gráficos:', error);
